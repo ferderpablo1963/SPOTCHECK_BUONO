@@ -340,6 +340,58 @@
         let startMesaPos = { x: 0, y: 0 };
         let startMesaSize = { w: 0, h: 0 };
 
+       
+        function parsePOSText() {
+    const rawText = document.getElementById('pos-raw-text').value;
+    if (!rawText.trim()) {
+        showToast("El campo está vacío");
+        return;
+    }
+
+    // Expresión regular para buscar "Tbl" o "tbl" seguido de espacios/caracteres opcionales y el número
+    // Captura formatos como: Tbl 20/1, Tbl 1/1, tbl 22/1, Tbl10
+    const regex = /[Tt][Bb][Ll]\s*(\d+)/g;
+    let match;
+    const detectedTables = [];
+
+    // Buscar todas las coincidencias en el texto pegado
+    while ((match = regex.exec(rawText)) !== null) {
+        const tableNumber = match[1]; // Este es el número de mesa capturado
+        if (!detectedTables.includes(tableNumber)) {
+            detectedTables.push(tableNumber);
+        }
+    }
+
+    if (detectedTables.length === 0) {
+        showToast("No se detectaron mesas (Tbl)");
+        return;
+    }
+
+    // Cambiar estado a 'occupied' (negro) de las mesas que coincidan en el plano
+    let updatedCount = 0;
+    tables.forEach(t => {
+        if (detectedTables.includes(t.label)) {
+            t.status = 'occupied';
+            updatedCount++;
+        }
+    });
+
+    if (updatedCount > 0) {
+        saveData();
+        render();
+        // Sincroniza automáticamente la cantidad en el input de sistema POS
+        document.getElementById('note-micros').value = detectedTables.length;
+        calculateDiscrepancy();
+        
+        showToast(`Cargadas ${updatedCount} mesas del POS`);
+        document.getElementById('pos-raw-text').value = ''; // Limpiar el campo
+    } else {
+        showToast("Mesas encontradas no existen en el mapa");
+    }
+}
+        
+        
+        
         function init() {
             if (tables.length === 0) createInitialLayout();
             render();
