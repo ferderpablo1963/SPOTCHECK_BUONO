@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#020617">
     
-    <title>SPOT CHECK - CONTROL PROFESIONAL- BUONO RESTAURANT </title>
+    <title>SPOT CHECK - CONTROL PROFESIONAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -166,7 +166,7 @@
                 <i class="fa-solid fa-layer-group text-slate-950 text-xl"></i>
             </div>
             <div>
-                <h1 class="font-black text-xl tracking-tighter uppercase italic leading-none">SPOT CHECK - BUONO RESTAURANT</h1>
+                <h1 class="font-black text-xl tracking-tighter uppercase italic leading-none">SPOT CHECK</h1>
                 <p class="text-[8px] text-slate-400 font-black tracking-[0.3em] uppercase mt-1">SISTEMA AUDITOR</p>
             </div>
         </div>
@@ -211,23 +211,12 @@
         </div>
     </main>
 
-
-
-
-    
-    <div id="printable-area" class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 max-w-md mx-auto w-full space-y-5">
-    <div class="text-center border-b border-slate-100 pb-3">
-        <h3 class="text-sm font-black uppercase italic text-slate-900 tracking-tight">PREPARACIÓN DE REPORTE</h3>
-        <p class="text-[9px] text-slate-400 font-bold uppercase">(Control vs POS System)</p>
-    </div>
-    
-    <div class="bg-slate-900 text-white p-4 rounded-3xl space-y-2 no-print">
-        <div class="flex justify-between items-center">
-            <span class="text-[9px] font-black uppercase text-emerald-400 italic"><i class="fa-solid fa-bolt"></i> Auto-Carga desde POS</span>
-            <button onclick="parsePOSText()" class="bg-emerald-500 text-slate-950 px-3 py-1 rounded-xl text-[9px] font-black uppercase hover:bg-emerald-400">Procesar</button>
-        </div>
-        <textarea id="pos-raw-text" rows="2" placeholder="Pega el texto del reporte o ticket aquí... (Ej: Tbl 20/1)" class="w-full p-2 bg-slate-800 border border-slate-700 rounded-xl text-[10px] text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500 transition-colors"></textarea>
-    </div>
+    <div id="notes-screen" class="screen-overlay flex-col p-4">
+        <div id="printable-area" class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 max-w-md mx-auto w-full space-y-5">
+            <div class="text-center border-b border-slate-100 pb-3">
+                <h3 class="text-sm font-black uppercase italic text-slate-900 tracking-tight">PREPARACIÓN DE REPORTE</h3>
+                <p class="text-[9px] text-slate-400 font-bold uppercase">(Control vs POS System)</p>
+            </div>
             
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
@@ -351,58 +340,6 @@
         let startMesaPos = { x: 0, y: 0 };
         let startMesaSize = { w: 0, h: 0 };
 
-       
-        function parsePOSText() {
-    const rawText = document.getElementById('pos-raw-text').value;
-    if (!rawText.trim()) {
-        showToast("El campo está vacío");
-        return;
-    }
-
-    // Expresión regular para buscar "Tbl" o "tbl" seguido de espacios/caracteres opcionales y el número
-    // Captura formatos como: Tbl 20/1, Tbl 1/1, tbl 22/1, Tbl10
-    const regex = /[Tt][Bb][Ll]\s*(\d+)/g;
-    let match;
-    const detectedTables = [];
-
-    // Buscar todas las coincidencias en el texto pegado
-    while ((match = regex.exec(rawText)) !== null) {
-        const tableNumber = match[1]; // Este es el número de mesa capturado
-        if (!detectedTables.includes(tableNumber)) {
-            detectedTables.push(tableNumber);
-        }
-    }
-
-    if (detectedTables.length === 0) {
-        showToast("No se detectaron mesas (Tbl)");
-        return;
-    }
-
-    // Cambiar estado a 'occupied' (negro) de las mesas que coincidan en el plano
-    let updatedCount = 0;
-    tables.forEach(t => {
-        if (detectedTables.includes(t.label)) {
-            t.status = 'occupied';
-            updatedCount++;
-        }
-    });
-
-    if (updatedCount > 0) {
-        saveData();
-        render();
-        // Sincroniza automáticamente la cantidad en el input de sistema POS
-        document.getElementById('note-micros').value = detectedTables.length;
-        calculateDiscrepancy();
-        
-        showToast(`Cargadas ${updatedCount} mesas del POS`);
-        document.getElementById('pos-raw-text').value = ''; // Limpiar el campo
-    } else {
-        showToast("Mesas encontradas no existen en el mapa");
-    }
-}
-        
-        
-        
         function init() {
             if (tables.length === 0) createInitialLayout();
             render();
